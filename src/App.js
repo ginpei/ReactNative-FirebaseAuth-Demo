@@ -149,12 +149,21 @@ export default class App extends Component {
 			});
 	}
 
+	/**
+	 * @see https://firebase.google.com/docs/reference/js/firebase.auth.Auth#createUserWithEmailAndPassword
+	 */
 	signInEmail() {
 		this.setState({ loading: true });
 
 		const email = 'anonymous@example.com';
 		const password = 'keepsecretyourpassword';
 		auth.createUserWithEmailAndPassword(email, password)
+			// if exists, just sign in instead of signing up
+			.catch(error => {
+				if (error.code ===  'auth/email-already-in-use') {
+					return auth.signInWithEmailAndPassword(email, password)
+				}
+			})
 			.then(_ => {
 				this.save();
 				this.updateSignedInStatus();
