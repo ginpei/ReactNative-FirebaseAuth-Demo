@@ -12,6 +12,18 @@ import {
 	Text,
 	View
 } from 'react-native';
+import firebase from 'firebase';
+import cred from './cred.json';
+
+if (firebase.apps.length < 1) {
+	firebase.initializeApp({
+		apiKey: `${cred.API_KEY}`,
+		authDomain: `${cred.PROJECT_ID}.firebaseapp.com`,
+		databaseURL: `https://${cred.PROJECT_ID}.firebaseio.com`,
+		storageBucket: `${cred.PROJECT_ID}.appspot.com`,
+	});
+}
+const auth = firebase.auth();
 
 function StatusText({ label, value }) {
 	const styles = StyleSheet.create({
@@ -50,8 +62,14 @@ export default class ReactNativeFirebaseAuth extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			anonymous: false,
+			email: null,
 			signedIn: false,
 		};
+	}
+
+	componentWillMount() {
+		this.updateSignedInStatus();
 	}
 
 	render() {
@@ -64,42 +82,91 @@ export default class ReactNativeFirebaseAuth extends Component {
 						/>
 					<StatusText
 						label="Anonymous?"
-						value={false}
+						value={this.state.anonymous}
 						/>
 					<StatusText
 						label="Email"
-						value={null}
+						value={this.state.email}
 						/>
 				</View>
 				<View style={styles.buttonLine}>
 					<Button
 						title="Sign in (anonymous)"
 						disabled={this.state.signedIn}
-						onPress={_ => console.debug('Sgin in (anonymous)')}
+						onPress={_ => this.signInAnonymous()}
 						/>
 				</View>
 				<View style={styles.buttonLine}>
 					<Button
 						title="Sign in (email)"
 						disabled={this.state.signedIn}
-						onPress={_ => console.debug('Sgin in (email)')}
+						onPress={_ => this.signInEmail()}
 						/>
 				</View>
 				<View style={styles.buttonLine}>
 					<Button
 						title="Sign out"
 						disabled={!this.state.signedIn}
-						onPress={_ => console.debug('Sgin out')}
+						onPress={_ => this.signOut()}
 						/>
 				</View>
 				<View style={styles.buttonLine}>
 					<Button
 						title="Save signing in status"
-						onPress={_ => console.debug('save')}
+						disabled={true}
+						onPress={_ => this.save()}
 						/>
 				</View>
 			</View>
 		);
+	}
+
+	updateSignedInStatus() {
+		const user = auth && auth.currentUser;
+		if (user) {
+			this.setState({
+				anonymous: user.providerData.length < 1,
+				email: user ? user.email : null,
+				signedIn: Boolean(user),
+			});
+		}
+		else {
+			this.setState({
+				anonymous: false,
+				email: null,
+				signedIn: false,
+			});
+		}
+	}
+
+	signInAnonymous() {
+		auth.signInAnonymously()
+			.then(_ => this.updateSignedInStatus());
+	}
+
+	signInEmail() {
+		const email = 'anonymous@example.com';
+		const password = 'keepsecretyourpassword';
+		auth.createUserWithEmailAndPassword(email, password)
+			.then(_ => this.updateSignedInStatus());
+	}
+
+	signOut() {
+		const user = auth.currentUser;
+		auth.signOut()
+			.then(_ => {
+				// delete user
+				if (user) {
+					return user.delete();
+				}
+				else {
+					return Promise.resolve();
+				}
+			})
+			.then(_ => this.updateSignedInStatus());
+	}
+
+	save() {
 	}
 }
 
