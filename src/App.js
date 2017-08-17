@@ -130,8 +130,8 @@ export default class App extends Component {
 		if (user) {
 			this.setState({
 				anonymous: user.providerData.length < 1,
-				email: user ? user.email : null,
-				signedIn: Boolean(user),
+				email: user.email,
+				signedIn: true,
 				uid: user.uid,
 			});
 		}
