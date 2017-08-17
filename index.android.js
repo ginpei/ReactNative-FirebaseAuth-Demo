@@ -6,6 +6,7 @@
 
 import React, { Component } from 'react';
 import {
+	ActivityIndicator,
 	Button,
 	AppRegistry,
 	StyleSheet,
@@ -64,6 +65,7 @@ export default class ReactNativeFirebaseAuth extends Component {
 		this.state = {
 			anonymous: false,
 			email: null,
+			loading: false,
 			signedIn: false,
 		};
 	}
@@ -92,30 +94,33 @@ export default class ReactNativeFirebaseAuth extends Component {
 				<View style={styles.buttonLine}>
 					<Button
 						title="Sign in (anonymous)"
-						disabled={this.state.signedIn}
+						disabled={this.state.loading || this.state.signedIn}
 						onPress={_ => this.signInAnonymous()}
 						/>
 				</View>
 				<View style={styles.buttonLine}>
 					<Button
 						title="Sign in (email)"
-						disabled={this.state.signedIn}
+						disabled={this.state.loading || this.state.signedIn}
 						onPress={_ => this.signInEmail()}
 						/>
 				</View>
 				<View style={styles.buttonLine}>
 					<Button
 						title="Sign out"
-						disabled={!this.state.signedIn}
+						disabled={this.state.loading || !this.state.signedIn}
 						onPress={_ => this.signOut()}
 						/>
 				</View>
 				<View style={styles.buttonLine}>
 					<Button
 						title="Save signing in status"
-						disabled={true}
+						disabled={this.state.loading || true}
 						onPress={_ => this.save()}
 						/>
+				</View>
+				<View style={[styles.loadingIndicator, { display: this.state.loading ? 'flex' : 'none' }]}>
+					<ActivityIndicator style={styles.indicator} />
 				</View>
 			</View>
 		);
@@ -140,18 +145,30 @@ export default class ReactNativeFirebaseAuth extends Component {
 	}
 
 	signInAnonymous() {
+		this.setState({ loading: true });
+
 		auth.signInAnonymously()
-			.then(_ => this.updateSignedInStatus());
+			.then(_ => {
+				this.updateSignedInStatus();
+				this.setState({ loading: false });
+			});
 	}
 
 	signInEmail() {
+		this.setState({ loading: true });
+
 		const email = 'anonymous@example.com';
 		const password = 'keepsecretyourpassword';
 		auth.createUserWithEmailAndPassword(email, password)
-			.then(_ => this.updateSignedInStatus());
+			.then(_ => {
+				this.updateSignedInStatus();
+				this.setState({ loading: false });
+			});
 	}
 
 	signOut() {
+		this.setState({ loading: true });
+
 		const user = auth.currentUser;
 		auth.signOut()
 			.then(_ => {
@@ -163,7 +180,10 @@ export default class ReactNativeFirebaseAuth extends Component {
 					return Promise.resolve();
 				}
 			})
-			.then(_ => this.updateSignedInStatus());
+			.then(_ => {
+				this.updateSignedInStatus();
+				this.setState({ loading: false });
+			});
 	}
 
 	save() {
@@ -186,6 +206,14 @@ const styles = StyleSheet.create({
 		minWidth: '50%',
 		paddingLeft: 16,
 		paddingRight: 16,
+	},
+	loadingIndicator: {
+		backgroundColor: 'rgba(255, 255, 255, 0.7)',
+		flex: 1,
+		height: '100%',
+		justifyContent: 'center',
+		position: 'absolute',
+		width: '100%',
 	},
 });
 
