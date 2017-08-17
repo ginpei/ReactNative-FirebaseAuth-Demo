@@ -12,7 +12,7 @@ import secret from '../secret.json';
 
 if (firebase.apps.length < 1) {
 	firebase.initializeApp({
-		apiKey: `${secret.API_KEY}`,
+		apiKey: secret.API_KEY,
 		authDomain: `${secret.PROJECT_ID}.firebaseapp.com`,
 		databaseURL: `https://${secret.PROJECT_ID}.firebaseio.com`,
 		storageBucket: `${secret.PROJECT_ID}.appspot.com`,
