@@ -6,6 +6,7 @@
 
 import React, { Component } from 'react';
 import {
+	AsyncStorage,
 	ActivityIndicator,
 	Button,
 	AppRegistry,
@@ -114,9 +115,9 @@ export default class ReactNativeFirebaseAuth extends Component {
 				</View>
 				<View style={styles.buttonLine}>
 					<Button
-						title="Save signing in status"
-						disabled={this.state.loading || true}
-						onPress={_ => this.save()}
+						title="Retrieve user ?"
+						disabled={this.state.loading}
+						onPress={_ => this.load()}
 						/>
 				</View>
 				<View style={[styles.loadingIndicator, { display: this.state.loading ? 'flex' : 'none' }]}>
@@ -149,6 +150,7 @@ export default class ReactNativeFirebaseAuth extends Component {
 
 		auth.signInAnonymously()
 			.then(_ => {
+				this.save();
 				this.updateSignedInStatus();
 				this.setState({ loading: false });
 			});
@@ -161,6 +163,7 @@ export default class ReactNativeFirebaseAuth extends Component {
 		const password = 'keepsecretyourpassword';
 		auth.createUserWithEmailAndPassword(email, password)
 			.then(_ => {
+				this.save();
 				this.updateSignedInStatus();
 				this.setState({ loading: false });
 			});
@@ -181,12 +184,25 @@ export default class ReactNativeFirebaseAuth extends Component {
 				}
 			})
 			.then(_ => {
+				this.save();
 				this.updateSignedInStatus();
 				this.setState({ loading: false });
 			});
 	}
 
 	save() {
+		console.debug('save user', auth.currentUser);
+		return AsyncStorage.setItem('user', JSON.stringify(auth.currentUser));
+	}
+
+	load() {
+		return AsyncStorage.getItem('user')
+			.then(json => {
+				const user = JSON.parse(json);
+				// then how to retrieve signing in?
+				console.debug('load user', user);
+				return user;
+			});
 	}
 }
 
