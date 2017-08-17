@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import {
-	AsyncStorage,
 	ActivityIndicator,
+	AsyncStorage,
 	Button,
-	AppRegistry,
 	StyleSheet,
 	Text,
-	View
+	View,
 } from 'react-native';
 import firebase from 'firebase';
 import cred from '../cred.json';
