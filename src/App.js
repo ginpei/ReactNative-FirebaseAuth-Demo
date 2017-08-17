@@ -38,8 +38,14 @@ function StatusText({ label, value }) {
 	});
 
 	let valueText;
-	if (typeof value === 'boolean') {
+	if (value === null) {
+		valueText = '';
+	}
+	else if (typeof value === 'boolean') {
 		valueText = value ? 'Yes' : 'No';
+	}
+	else if (value instanceof Array) {
+		valueText = value.join(',');
 	}
 	else {
 		valueText = String(value);
@@ -57,7 +63,7 @@ export default class App extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			anonymous: false,
+			providers: null,
 			email: null,
 			loading: false,
 			signedIn: false,
@@ -82,8 +88,8 @@ export default class App extends Component {
 						value={this.state.uid}
 						/>
 					<StatusText
-						label="Anonymous?"
-						value={this.state.anonymous}
+						label="Providers"
+						value={this.state.providers}
 						/>
 					<StatusText
 						label="Email"
@@ -128,8 +134,9 @@ export default class App extends Component {
 	updateSignedInStatus() {
 		const user = auth && auth.currentUser;
 		if (user) {
+			const providers = user.providerData.length > 0 ? user.providerData.map(v => v.providerId) : ['anonymous'];
 			this.setState({
-				anonymous: user.providerData.length < 1,
+				providers: providers,
 				email: user.email,
 				signedIn: true,
 				uid: user.uid,
@@ -137,7 +144,7 @@ export default class App extends Component {
 		}
 		else {
 			this.setState({
-				anonymous: false,
+				providers: null,
 				email: null,
 				signedIn: false,
 				uid: null,
