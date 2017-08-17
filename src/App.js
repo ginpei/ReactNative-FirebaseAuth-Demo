@@ -61,6 +61,7 @@ export default class App extends Component {
 			email: null,
 			loading: false,
 			signedIn: false,
+			uid: null,
 		};
 	}
 
@@ -75,6 +76,10 @@ export default class App extends Component {
 					<StatusText
 						label="Signed in?"
 						value={this.state.signedIn}
+						/>
+					<StatusText
+						label="User ID"
+						value={this.state.uid}
 						/>
 					<StatusText
 						label="Anonymous?"
@@ -127,6 +132,7 @@ export default class App extends Component {
 				anonymous: user.providerData.length < 1,
 				email: user ? user.email : null,
 				signedIn: Boolean(user),
+				uid: user.uid,
 			});
 		}
 		else {
@@ -134,6 +140,7 @@ export default class App extends Component {
 				anonymous: false,
 				email: null,
 				signedIn: false,
+				uid: null,
 			});
 		}
 	}
